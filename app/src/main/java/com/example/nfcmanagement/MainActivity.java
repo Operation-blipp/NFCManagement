@@ -1,36 +1,63 @@
 package com.example.nfcmanagement;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
+import android.nfc.tech.MifareClassic;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import  com.example.nfcmanagement.NFCServerHandler;
 import  com.example.nfcmanagement.NFCServerCallback;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.util.Base64;
+
 public class MainActivity extends AppCompatActivity implements NfcAdapter.ReaderCallback,NFCServerCallback{
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public JSONObject HandleRequest(JSONObject ClientRequest)
     {
-        JSONObject ReturnValue = null;
+        JSONObject ReturnValue = new JSONObject();
 
-        if (ClientRequest.has("getUID")) {
-            String UID = tagHeader.getUID();
-        }
+        Log.i("HandleRequest", "Request Received: " + ClientRequest.toString());
 
-        try
-        {
-            String jsonString = String.format("{\"UID\":\"%s\"}", tagHeader.getUID());
-            ReturnValue = new JSONObject(jsonString);
+        try {
+
+            // UID
+            if (ClientRequest.has("getUID")) {
+                ReturnValue.put("UID", tagHeader.getUID());
+            }
+            // ReadTag
+            if (ClientRequest.has("readTag")) {
+                readCard();
+                if (cardData == null) {
+                    ReturnValue.put("cardData", "");
+                }
+                ReturnValue.put("cardData", new String(Base64.getEncoder().encode(cardData)));
+                Log.i("size", Integer.toString(cardData.length));
+                cardData = null;
+            }
+
+            if (ReturnValue == null) {
+                ReturnValue.put("empty", "empty");
+            }
+
         }
         catch (Exception e)
         {
-
+            Log.e("error", e.getMessage());
         }
+
+
+        Log.i("returnData", ReturnValue.toString());
         return(ReturnValue);
     }
     NFCServerHandler m_ServerHandler = null;
@@ -38,6 +65,31 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     NfcAdapter nfcAdapter;
     NFCTagHeader tagHeader;
     Tag tag;
+    byte[] cardData = null;
+
+
+    public void readCard() {
+
+        if (!nfcHandler.tagIsConnected(tag)) {
+            Toast.makeText(this, "No valid NFC tag detected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        MifareClassic mifareTag = MifareClassic.get(tag);
+        try {
+            cardData = nfcHandler.readTag(mifareTag, getApplicationContext());
+            if (cardData == null) {
+                // TODO: Improve with actual error, i.e "Auth fail on sector0"
+                Toast.makeText(this, "Failed while reading card data!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+        } catch (IOException e) {
+            Toast.makeText(this, "Error reading card data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
