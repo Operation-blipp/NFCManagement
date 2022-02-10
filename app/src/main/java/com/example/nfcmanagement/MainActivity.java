@@ -17,9 +17,15 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     public JSONObject HandleRequest(JSONObject ClientRequest)
     {
         JSONObject ReturnValue = null;
+
+        if (ClientRequest.has("getUID")) {
+            String UID = tagHeader.getUID();
+        }
+
         try
         {
-            ReturnValue = new JSONObject("{\"HejHej\":\"UwU\"}");
+            String jsonString = String.format("{\"UID\":\"%s\"}", tagHeader.getUID());
+            ReturnValue = new JSONObject(jsonString);
         }
         catch (Exception e)
         {
@@ -72,10 +78,11 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
     public void onTagDiscovered (Tag localTag) {
 
-        Log.v("here", "here");
+        Log.i("here", "here");
         tag = localTag;
         assert tag != null;
         tagHeader = new NFCTagHeader(tag);
+        Log.i("tag", tagHeader.getUID());
         //Toast.makeText(this, "New card with UID " + tagHeader.getUID() + " detected", Toast.LENGTH_SHORT).show();
     }
 
