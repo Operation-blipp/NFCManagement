@@ -7,8 +7,27 @@ import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
 
-public class MainActivity extends AppCompatActivity implements NfcAdapter.ReaderCallback{
+import  com.example.nfcmanagement.NFCServerHandler;
+import  com.example.nfcmanagement.NFCServerCallback;
 
+import org.json.JSONObject;
+
+public class MainActivity extends AppCompatActivity implements NfcAdapter.ReaderCallback,NFCServerCallback{
+
+    public JSONObject HandleRequest(JSONObject ClientRequest)
+    {
+        JSONObject ReturnValue = null;
+        try
+        {
+            ReturnValue = new JSONObject("{\"HejHej\":\"UwU\"}");
+        }
+        catch (Exception e)
+        {
+
+        }
+        return(ReturnValue);
+    }
+    NFCServerHandler m_ServerHandler = null;
     NFCHandler nfcHandler = new NFCHandler();
     NfcAdapter nfcAdapter;
     NFCTagHeader tagHeader;
@@ -20,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         setContentView(R.layout.activity_main);
 
         nfcAdapter = nfcHandler.createAdapter(this);
+
+        m_ServerHandler = new NFCServerHandler(this);
     }
 
     @Override
