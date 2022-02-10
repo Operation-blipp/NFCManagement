@@ -35,7 +35,7 @@ public class NFCServerHandler implements Runnable
 
             Socket ClientConnection = ListeningSocket.accept();
 
-            Log.i("NFCServer","Connection establishe!");
+            Log.i("NFCServer","Connection established!");
 
             InputStream ClientInput = ClientConnection.getInputStream();
             OutputStream ClientOutput = ClientConnection.getOutputStream();
