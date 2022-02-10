@@ -46,7 +46,9 @@ def createConnection():
 
 def sendMessage(s, message):
 
-    BUFFER_SIZE = 1024
+    message = message.replace("\n", "").replace("\r","")
+
+    BUFFER_SIZE = 10_000
     MESSAGE = message.encode("utf-8") + b"\n"
 
     s.send(MESSAGE)
@@ -58,7 +60,14 @@ def sendMessage(s, message):
 def main():
 
     s = createConnection()
-    r = sendMessage(s, "{uwu:owo}")
+    r = sendMessage(s, """
+    
+    {
+        "getUID": "ALIHFUKASHDFYUHASDUKFHASKUDF",
+        "readTag": "ASDASDASD"
+    }
+    
+    """)
     print(r)
 
     s.close()
