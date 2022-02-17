@@ -28,30 +28,43 @@ public class NFCServerHandler implements Runnable
 
     void p_ListeningLoop()
     {
-        try
+        while(true)
         {
             Log.i("NFCServer","Listening loop engaged");
-            ServerSocket ListeningSocket = new ServerSocket(13378);
 
-            Socket ClientConnection = ListeningSocket.accept();
-
-            Log.i("NFCServer","Connection established!");
-
-            InputStream ClientInput = ClientConnection.getInputStream();
-            OutputStream ClientOutput = ClientConnection.getOutputStream();
-            while(true)
+            Socket ClientConnection = null;
+            try
             {
-                JSONObject  ClientRequest = new JSONObject((new Scanner(ClientInput, "UTF-8").nextLine()));
+                ServerSocket ListeningSocket = new ServerSocket(13378);
+                ClientConnection = ListeningSocket.accept();
+            }
+            catch (Exception e)
+            {
+                Log.i("NFCServer",e.getMessage());
+                break;
+            }
 
-                JSONObject Response = m_CallbackToUse.HandleRequest(ClientRequest);
+            try
+            {
+                Log.i("NFCServer","Connection established!");
 
-                ClientOutput.write(Response.toString().getBytes(StandardCharsets.UTF_8));
+                InputStream ClientInput = ClientConnection.getInputStream();
+                OutputStream ClientOutput = ClientConnection.getOutputStream();
+                while(true)
+                {
+                    JSONObject  ClientRequest = new JSONObject((new Scanner(ClientInput, "UTF-8").nextLine()));
+
+                    JSONObject Response = m_CallbackToUse.HandleRequest(ClientRequest);
+
+                    ClientOutput.write(Response.toString().getBytes(StandardCharsets.UTF_8));
+                }
+            }
+            catch (Exception e)
+            {
+                Log.i("NFCServer","Error when listening to client: "+e.getMessage());
             }
         }
-        catch (Exception e)
-        {
-            Log.d("NFCServerError",e.getMessage());
-        }
+        Log.i("NFCServer","Listening loop aborted");
     }
 
     public NFCServerHandler(NFCServerCallback Callback)
