@@ -29,27 +29,31 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
         Log.i("HandleRequest", "Request Received: " + ClientRequest.toString());
 
+
         try {
-
-            // UID
-            if (ClientRequest.has("getUID")) {
-                ReturnValue.put("UID", tagHeader.getUID());
-            }
-            // ReadTag
-            if (ClientRequest.has("readTag")) {
-                readCard();
-                if (cardData == null) {
-                    ReturnValue.put("cardData", "");
+            if (tagHeader != null) {
+                // UID
+                if (ClientRequest.has("getUID")) {
+                    ReturnValue.put("UID", tagHeader.getUID());
                 }
-                ReturnValue.put("cardData", new String(Base64.getEncoder().encode(cardData)));
-                Log.i("size", Integer.toString(cardData.length));
-                cardData = null;
-            }
+                // ReadTag
+                if (ClientRequest.has("readTag")) {
+                    readCard();
+                    if (cardData == null) {
+                        ReturnValue.put("cardData", "");
+                    }
+                    ReturnValue.put("cardData", new String(Base64.getEncoder().encode(cardData)));
+                    Log.i("size", Integer.toString(cardData.length));
+                    cardData = null;
+                }
 
-            if (ReturnValue == null) {
-                ReturnValue.put("empty", "empty");
+                if (ReturnValue == null) {
+                    ReturnValue.put("empty", "empty");
+                }
             }
-
+            else {
+                ReturnValue.put("Empty", "empty");
+            }
         }
         catch (Exception e)
         {
